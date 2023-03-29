@@ -1,0 +1,13 @@
+C:\Users\Murat\Documents\c#\todo\to do\to do\bin\Debug\to do.exe.config
+C:\Users\Murat\Documents\c#\todo\to do\to do\bin\Debug\to do.exe
+C:\Users\Murat\Documents\c#\todo\to do\to do\bin\Debug\to do.pdb
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to do.csproj.AssemblyReference.cache
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to do.csproj.SuggestedBindingRedirects.cache
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to_do.Form1.resources
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to_do.Properties.Resources.resources
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to do.csproj.GenerateResource.cache
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to do.csproj.CoreCompileInputs.cache
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to do.exe
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to do.pdb
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to_do.Form2.resources
+C:\Users\Murat\Documents\c#\todo\to do\to do\obj\Debug\to_do.Form3.resources
