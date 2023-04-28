@@ -3,11 +3,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 /*
     YAPILACAKLAR
-*
-*takvim kısmı 
+*gorevler status yada biri değiştiğinde oto kayıt olacak /*gorevler kayıt altında olacak save ye basınca gozden gecirecek degişikliği update yapacak
+*takvim kısmı  bir hata var         tamam
+*gorevler silme islemi              tamam
 *user kayıt kısmına bak
 *       UCMAK İSTERSEN 
 *           sağ click olayı 
@@ -95,12 +97,12 @@ namespace to_do
         }//all butonuna basıldında olcaklar
         private void savebtn_Click(object sender, EventArgs e)
         {
-
-            Console.WriteLine("basıldı");
             MySqlConnection connect = Connect();
-          
+
+            Console.WriteLine(" yeni row icin   basıldı");
+
             int totalRowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);//sadece görunen rows sayar 
-//           int newRowCount = totalRowCount - rowCount;
+                                                                                                  //           int newRowCount = totalRowCount - rowCount;
             for (int i = rowCount; i < totalRowCount; i++)
             {
                 DataGridViewRow row = dataGridView1.Rows[i];
@@ -126,7 +128,7 @@ namespace to_do
 
             }
             rowCount = dataGridView1.Rows.Count;//hepsini sayar
-           newRows.Clear();
+            newRows.Clear();
 
 
 
@@ -173,8 +175,6 @@ namespace to_do
 
 
         }
-
-
         public Dictionary<string,int> GetCategories()
         {
             string sql;
@@ -212,7 +212,7 @@ namespace to_do
             MySqlConnection conn;
             conn = Connect();
             string sql;
-
+            Console.WriteLine("burada");
             if (filter != null)
             {
                 sql = $"SELECT * FROM tasks INNER JOIN category ON tasks.categoryId = category.id WHERE tasks.userid={userid} and {filter}";
@@ -221,18 +221,22 @@ namespace to_do
             {
                 sql = $"SELECT * FROM tasks INNER JOIN category ON tasks.categoryId = category.id WHERE tasks.userid={userid}";
             }
+            Console.WriteLine("burada1");
 
             using (MySqlCommand command = new MySqlCommand(sql, conn))
             {
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
+                    Console.WriteLine("burada2");
+
+
                     while (reader.Read())
                     {
                         // Verileri oku ve kullani
                         object title = reader.GetString("title");
                         object categoryname = reader.GetString("category_name");
-                        object startdate = reader.GetDateTime("startdate").ToShortDateString();
-                        object enddate = reader.GetDateTime("enddate").ToShortDateString();
+                        object startdate = reader.GetDateTime("startdate").ToString("yyyy/MM/dd");
+                        object enddate = reader.GetDateTime("enddate").ToString("yyyy/MM/dd");
                         bool status = reader.GetBoolean("status");
                         dataGridView1.Refresh();
                         dataGridView1.Rows.Add($"{title}", $"{categoryname}", $"{startdate}", $"{enddate}", status);
@@ -301,11 +305,126 @@ namespace to_do
             PrintTasks();
             dataGridView2.Refresh();
         }
+
+        private void monthCalendar1_DateChanged(object sender, DateRangeEventArgs e)
+        {
+            string selectedDate = monthCalendar1.SelectionStart.ToString("yyyy/MM/dd");
+            PrintTasks($"startdate='{selectedDate}'");
+        }//basılan tarih gorevlerini getiriyor
+
+        private void delbtn_Click(object sender, EventArgs e)
+        {
+            MySqlConnection conn;
+            conn = Connect();
+            try
+            {
+            int selectedRowIndex = dataGridView1.SelectedCells[0].RowIndex; // seçilen hücrenin satır indeksi
+            DataGridViewRow selectedRow = dataGridView1.Rows[selectedRowIndex]; // seçilen satır
+            string cellValue = selectedRow.Cells[0].Value.ToString(); // seçilen satırdaki ilk hücrenin değeri
+
+            Console.WriteLine(cellValue);
+            string sql = $"DELETE FROM tasks WHERE title='{cellValue}'";
+            MySqlCommand cmd = new MySqlCommand(sql, conn);
+            int rowsAffected = cmd.ExecuteNonQuery();
+            //Console.Clear();
+            Console.WriteLine($"{rowsAffected} kayıt silindi.");
+            PrintTasks();
+            }
+            catch (Exception ex)
+            {
+               Console.WriteLine("hata var "+ex.Message ); 
+            }
+
+        }//gorev silme 
+
+       /* //private void dataGridView1_KeyDown(object sender, DataGridViewCellEventArgs e, KeyEventArgs k)
+        //{
+        //    Console.WriteLine(" anlasdvdjsk");
+        //    MySqlConnection conn;
+        //    conn = Connect();
+        //    // Hangi hücre tıklandı
+        //    while (true)
+        //    {
+        //        if (k.KeyCode == Keys.Enter)
+        //        {
+        //            DataGridViewCell clickedCell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+        //            // Hangi görevin değiştirildiğini bulmak için tıklanan hücrenin satırını alın
+        //            DataGridViewRow clickedRow = dataGridView1.Rows[e.RowIndex];
+
+        //            // Değiştirilen görevin ID'sini bulmak için satırın Tag özelliğini kullanın
+        //            int taskId = (int)clickedRow.Tag;
+
+        //            // Hangi sütun değiştirildi?
+        //            string columnName = dataGridView1.Columns[e.ColumnIndex].Name;
+
+        //            // Yapılacak işlemler
+        //            // ...
+        //            if (columnName == "description")
+        //            {
+        //                // Yeni değeri al
+        //                string newDescription = clickedCell.Value.ToString();
+        //                string sql = $"update tasks set title='{newDescription}' where id=9";
+
+        //                MySqlCommand cmd = new MySqlCommand(sql, conn);
+        //                int rowsAffected = cmd.ExecuteNonQuery();
+        //                Console.WriteLine($" kayıt etkilende: {rowsAffected}");
+
+        //            }
+        //        }
+        //    }
+
+        //}
+       */
+      
+        
+        
+        
+        private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            Console.WriteLine(" anlasdvdjsk");
+            DataGridViewRow clickedRow = dataGridView1.Rows[e.RowIndex];
+            int taskId = (int)clickedRow.Tag;
+            string columnName = dataGridView1.Columns[e.ColumnIndex].Name;
+            string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+
+            MySqlConnection conn = Connect();
+            MySqlCommand cmd = conn.CreateCommand();
+
+            switch (columnName)
+            {
+                case "title":
+                    cmd.CommandText = $"UPDATE tasks SET title='{newValue}' WHERE id='{taskId}'";
+                    break;
+                case "startdate":
+                    cmd.CommandText = $"UPDATE tasks SET startdate='{newValue}' WHERE id='{taskId}'";
+                    break;
+                case "enddate":
+                    cmd.CommandText = $"UPDATE tasks SET enddate='{newValue}' WHERE id='{taskId}'";
+                    break;
+                case "status":
+                    cmd.CommandText = $"UPDATE tasks SET status='{newValue}' WHERE id='{taskId}'";
+                    break;
+            }
+
+            int rowsAffected = cmd.ExecuteNonQuery();
+            Console.WriteLine($" kayıt etkilende: {rowsAffected}");
+
+            conn.Close();
+        }
+
+      
+
     }
 
 
 
-    
+
+
+
+
+
+
 }
     
 

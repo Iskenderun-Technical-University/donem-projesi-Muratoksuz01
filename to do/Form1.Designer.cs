@@ -42,6 +42,7 @@
             this.dataGridView3 = new System.Windows.Forms.DataGridView();
             this.addbtn = new System.Windows.Forms.Button();
             this.savebtn = new System.Windows.Forms.Button();
+            this.delbtn = new System.Windows.Forms.Button();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,6 +59,7 @@
             this.monthCalendar1.Name = "monthCalendar1";
             this.monthCalendar1.ShowTodayCircle = false;
             this.monthCalendar1.TabIndex = 5;
+            this.monthCalendar1.DateChanged += new System.Windows.Forms.DateRangeEventHandler(this.monthCalendar1_DateChanged);
             // 
             // dataGridView1
             // 
@@ -156,6 +158,16 @@
             this.savebtn.Visible = false;
             this.savebtn.Click += new System.EventHandler(this.savebtn_Click);
             // 
+            // delbtn
+            // 
+            this.delbtn.Location = new System.Drawing.Point(1195, 41);
+            this.delbtn.Name = "delbtn";
+            this.delbtn.Size = new System.Drawing.Size(85, 23);
+            this.delbtn.TabIndex = 11;
+            this.delbtn.Text = "DELETE";
+            this.delbtn.UseVisualStyleBackColor = true;
+            this.delbtn.Click += new System.EventHandler(this.delbtn_Click);
+            // 
             // Column1
             // 
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.Transparent;
@@ -163,7 +175,7 @@
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.Black;
             this.Column1.DefaultCellStyle = dataGridViewCellStyle1;
             this.Column1.FillWeight = 200F;
-            this.Column1.HeaderText = "description";
+            this.Column1.HeaderText = "title";
             this.Column1.MinimumWidth = 6;
             this.Column1.Name = "Column1";
             this.Column1.Width = 125;
@@ -213,6 +225,7 @@
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(1318, 692);
+            this.Controls.Add(this.delbtn);
             this.Controls.Add(this.savebtn);
             this.Controls.Add(this.addbtn);
             this.Controls.Add(this.dataGridView3);
@@ -237,6 +250,7 @@
         private System.Windows.Forms.Button addbtn;
         private System.Windows.Forms.Button savebtn;
         private System.Windows.Forms.DataGridViewLinkColumn All;
+        private System.Windows.Forms.Button delbtn;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column5;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;

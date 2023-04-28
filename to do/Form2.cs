@@ -108,11 +108,6 @@ namespace to_do
                     form.RefreshDataGridView();
 
                 }
-                
-
-                
-
-
             }
         } //secilen asatırı ve altındaki tum gorevleri siler
     }
