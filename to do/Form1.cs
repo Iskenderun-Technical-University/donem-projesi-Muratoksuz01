@@ -10,11 +10,12 @@ using System.Windows.Forms;
 *gorevler status yada biri değiştiğinde oto kayıt olacak /*gorevler kayıt altında olacak save ye basınca gozden gecirecek degişikliği update yapacak
 *takvim kısmı  bir hata var         tamam
 *gorevler silme islemi              tamam
-*user kayıt kısmına bak
+*user kayıt kısmına bak             yarıda form1 once yukleniyor yanlış bilgi yinede giiriyor
 *       UCMAK İSTERSEN 
 *           sağ click olayı 
 *           rename olayı 
 *           bana anımsat olayı 
+*           sifre sifirlama
 *
  */
 

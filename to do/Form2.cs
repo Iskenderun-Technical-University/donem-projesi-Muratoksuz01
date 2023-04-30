@@ -78,10 +78,6 @@ namespace to_do
 
         }
 
-
-
-
-
         private void delbtn_Click(object sender, EventArgs e)
         {
             if (dataGridView1.SelectedCells.Count > 0) // en az bir hücre seçili mi?
