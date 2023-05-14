@@ -141,7 +141,7 @@
             this.txtlopass.Name = "txtlopass";
             this.txtlopass.Size = new System.Drawing.Size(100, 22);
             this.txtlopass.TabIndex = 16;
-            this.txtlopass.Text = "43210";
+            this.txtlopass.Text = "4321";
             // 
             // txtlouser
             // 

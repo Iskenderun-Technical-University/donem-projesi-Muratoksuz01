@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,16 +14,33 @@ namespace to_do
 {
     public partial class Form3 : Form
     {
-        private Form1 form1;
-       
         string sql;
+        public int userid;
+        public string username1;
 
-
-        public Form3(Form1 form1)
+        public Form3()
         {
             InitializeComponent();
-            this.form1 = form1;
+             
             
+        }
+        public MySqlConnection Connect()
+        {
+            string connStr = "server=localhost;user=root;database=todo;port=3306;password=1234;";
+            MySqlConnection conn = new MySqlConnection(connStr);
+            try
+            {
+                // Veritabanı bağlantısını aç
+                conn.Open();
+                return conn;
+
+            }
+            catch (Exception ex)
+            {
+                // Bağlantı hatası oluştuysa burada işlemler yapılabilir
+                Console.WriteLine("Hata: " + ex.ToString());
+                return null;
+            }
         }
 
         private void lbgiris_Click(object sender, EventArgs e)
@@ -31,6 +49,7 @@ namespace to_do
             lbinfo.Visible = false;
             lblink.Visible = false;
             lbpass.Visible = false;
+            lbemail.Visible = false;
             lbuser.Visible = false;
             btnkayit.Visible = false;
 
@@ -70,6 +89,7 @@ namespace to_do
             lbinfo.Visible = true;
             lblink.Visible = true;
             lbpass.Visible = true;
+            lbemail.Visible = true;
             lbuser.Visible = true;
             btnkayit.Visible = true;
 
@@ -81,51 +101,63 @@ namespace to_do
         {
             //kayıt olacak 
             MySqlConnection conn;
-            conn = form1.Connect();
+            conn = Connect();
             string username = txtreuser.Text;
             string password = txtrepass.Text;
             string email= txtreemail.Text;
-            sql = $"INSERT INTO users (username,passwd,email) VALUES ('{username}','{password}','{email}')";
-            MySqlCommand cmd = new MySqlCommand(sql, conn);
-            int rowsAffected = cmd.ExecuteNonQuery();
-            if (rowsAffected != 0)
+          
+
+            if(email!="" &&username!="" && password != "")
             {
-                MessageBox.Show("basarılı");
-                // login 
-                lbheader.Visible = false;
-                lbinfo.Visible = false;
-                lblink.Visible = false;
-                lbpass.Visible = false;
-                lbuser.Visible = false;
-                btnkayit.Visible = false;
+                sql = $"INSERT INTO users (username,passwd,email) VALUES ('{username}','{password}','{email}')";
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                int rowsAffected = cmd.ExecuteNonQuery();
+                if (rowsAffected != 0)
+                {
+                    MessageBox.Show("basarılı");
+                    // login 
+                    lbheader.Visible = false;
+                    lbinfo.Visible = false;
+                    lblink.Visible = false;
+                    lbemail.Visible = false;
+                    lbpass.Visible = false;
+                    lbuser.Visible = false;
+                    btnkayit.Visible = false;
 
-                txtrepass.Visible = false;
-                txtreuser.Visible = false;
-                txtreemail.Visible = false;
+                    txtrepass.Visible = false;
+                    txtreuser.Visible = false;
+                    txtreemail.Visible = false;
 
 
-                // kayıt 
-                lblheader.Visible = true;
-                lblinfo.Visible = true;
-                lbllink.Visible = true;
-                lblpass.Visible = true;
-                lbluser.Visible = true;
-                btngiris.Visible = true;
+                    // kayıt 
+                    lblheader.Visible = true;
+                    lblinfo.Visible = true;
+                    lbllink.Visible = true;
+                    lblpass.Visible = true;
+                    lbluser.Visible = true;
+                    btngiris.Visible = true;
 
-                txtlouser.Visible = true;
-                txtlopass.Visible = true;
+                    txtlouser.Visible = true;
+                    txtlopass.Visible = true;
 
+                }
+                else MessageBox.Show("olmadı ");
+                //Console.Clear();
+                Console.WriteLine($"{rowsAffected} kayıt eklendi.");
             }
-            else MessageBox.Show("olmadı ");
-            //Console.Clear();
-            Console.WriteLine($"{rowsAffected} kayıt eklendi.");
+            else
+            {
+                MessageBox.Show("bilgileri doldurunuz");
+            }
+            
+           
 
         }
 
         private void btngiris_Click(object sender, EventArgs e)
         {
             MySqlConnection conn;
-            conn = form1.Connect();
+            conn = Connect();
             string username=txtlouser.Text;
             string password=txtlopass.Text;
             sql = $"SELECT * FROM users WHERE username='{username}' and passwd='{password}'";
@@ -134,11 +166,22 @@ namespace to_do
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
                     Console.WriteLine(reader.ToString());
-                    if (reader!=null) 
+                    if (reader.HasRows) 
                     {
-                        //Form1 form = new Form1();
+
+                        while (reader.Read())
+                        {
+                            // kayıt varsa ilgili verileri burada kullanabilirsiniz
+                            userid = (int)reader["id"];
+                            username1 = reader.GetString("username");
+                        }
+
+
+
+                        Form1 form1 = new Form1(this);
                         form1.Show();
                         this.Hide();
+                        Console.WriteLine(userid.ToString()+"   "+ username1);
                     }
                     else
                     {

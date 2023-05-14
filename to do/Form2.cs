@@ -45,7 +45,7 @@ namespace to_do
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             MySqlConnection conn;
-            conn = form1.Connect();
+            conn = form1.conn;
         }
 
         private void addcatebtn_Click(object sender, EventArgs e)
@@ -59,7 +59,7 @@ namespace to_do
         private void savebtn1_Click(object sender, EventArgs e)
         {
             MySqlConnection conn;
-            conn = form1.Connect();
+            conn = form1.conn;
             int totalRowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);//sadece görunen rows sayar 
 
             for (int i = rowCount;i<totalRowCount;i++)
@@ -83,7 +83,7 @@ namespace to_do
             if (dataGridView1.SelectedCells.Count > 0) // en az bir hücre seçili mi?
             {
                 MySqlConnection conn;
-                conn = form1.Connect();
+                conn = form1.conn;
                 int selectedRowIndex = dataGridView1.SelectedCells[0].RowIndex; // seçilen hücrenin satır indeksi
                 DataGridViewRow selectedRow = dataGridView1.Rows[selectedRowIndex]; // seçilen satır
                 string cellValue = selectedRow.Cells[0].Value.ToString(); // seçilen satırdaki ilk hücrenin değeri

@@ -16,7 +16,7 @@ namespace to_do
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form3(new Form1()));
+            Application.Run(new Form3());
         }
     }
 }
