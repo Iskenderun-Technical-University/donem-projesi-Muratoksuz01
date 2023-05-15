@@ -11,14 +11,16 @@ using MySql.Data.MySqlClient;
 
 /*
     YAPILACAKLAR
-*gorevler status yada biri değiştiğinde oto kayıt olacak 
-*aynı sekilde categoriy isim degişmesi
-*gorev eklendiğinde message box ekle   tamam
-*user kısmına 'create accaunt' ekle  tamam 
-*start date ve adn date eski tarih ekleyemessin ve start>end date olması 
-*takvim kısmı  bir hata var         tamam
-*gorevler silme islemi              tamam
-*user kayıt kısmına bak             tamam
+*gorevler status yada biri değiştiğinde oto kayıt olacak                        OLMADI
+*aynı sekilde categoriy isim degişmesi                                         OLMADI
+*gorev eklendiğinde message box ekle                                         tamam
+*user kısmına 'create accaunt' ekle                                         tamam 
+*start date ve adn date eski tarih ekleyemessin ve start>end date olması    OLMADI
+*takvim kısmı  bir hata var                                                 tamam
+*gorevler silme islemi                                                       tamam
+*user kayıt kısmına bak                                                      tamam
+*data gizli ıd sok sonra bunu cek fook kurtul 
+*aynı sekilde kate için 
 *       UCMAK İSTERSEN 
 *           sağ click olayı 
 *           rename olayı 
@@ -42,17 +44,17 @@ namespace to_do
         string title = "";
         List<string[]> newRows = new List<string[]>();
         DateTime today = DateTime.Today;
-        
+
         public Form1(Form3 form3)
         {
             // DataGridView'in arka plan rengini şeffaf yap
-            
+
 
 
             this.Text = form3.username1;
-            userid=form3.userid;
-            this .form3 = form3;
-            conn=form3.Connect ();
+            userid = form3.userid;
+            this.form3 = form3;
+            conn = form3.Connect();
             InitializeComponent();
             PrintTasks();
             rowCount = dataGridView1.Rows.Count;//hepsini sayar
@@ -87,7 +89,7 @@ namespace to_do
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            dataGridView1.Rows.Add("tasks name", $"{columnname}", $"{today.ToString("dd/MM/yyyy")}",    $"{today.ToString("dd/MM/yyyy")}", false);
+            dataGridView1.Rows.Add("tasks name", $"{columnname}", $"{today.ToString("dd/MM/yyyy")}", $"{today.ToString("dd/MM/yyyy")}", false);
             savebtn.Show();
         }//add butonu 
         private void dataGridView2_CellContentClick(object sender,
@@ -97,7 +99,7 @@ namespace to_do
             if (e.ColumnIndex == 0) // 'all' sütununa tıklandığında sayfa yanılenıyor ve addbtn gizleniyor
             {
                 addbtn.Hide();
-              //  dataGridView1.Refresh();
+                //  dataGridView1.Refresh();
                 columnname = null;
                 PrintTasks();
 
@@ -109,16 +111,16 @@ namespace to_do
                 columnname = dataGridView2.Columns[e.ColumnIndex].Name;
                 PrintTasks($"category_name = '{columnname}'");
             }
-           
-                rowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);
-                Console.WriteLine(rowCount);
+
+            rowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);
+            Console.WriteLine(rowCount);
             Console.WriteLine($"Seçilen sütun: {columnname}");
-  
+
         }//all butonuna basıldında olcaklar
         private void savebtn_Click(object sender, EventArgs e)
         {
             //MySqlConnection connect = Connect();
-            
+
             Console.WriteLine(" yeni row icin   basıldı");
 
             int totalRowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);//sadece görunen rows sayar 
@@ -144,7 +146,7 @@ namespace to_do
                 string end = values[3];
                 string status = values[4];
                 Console.WriteLine("kayıtlar basladı ");
-                Save( des, cat, start, end, status);
+                Save(des, cat, start, end, status);
 
             }
             rowCount = dataGridView1.Rows.Count;//hepsini sayar
@@ -154,8 +156,7 @@ namespace to_do
 
         }
         
-        public void Save( string title, string category, string
-            startDate, string endDate, string status)
+        public void Save( string title, string category, string startDate, string endDate, string status)
         {
             Dictionary<string,int> myDictionary = GetCategories();
             bool statusBool = bool.Parse(status);
@@ -175,7 +176,7 @@ namespace to_do
             //Console.Clear();
             Console.WriteLine($"{rowsAffected} kayıt eklendi.");
             //%Y-%m-%d
-
+            conn.Clone();
 
         }
         public Dictionary<string,int> GetCategories()
@@ -215,7 +216,7 @@ namespace to_do
             //MySqlConnection conn;
             //conn = Connect();
             string sql;
-            Console.WriteLine("burada");
+            
             if (filter != null)
             {
                 sql = $"SELECT * FROM tasks INNER JOIN category ON tasks.categoryId = category.id WHERE tasks.userid={userid} and {filter}";
@@ -224,13 +225,12 @@ namespace to_do
             {
                 sql = $"SELECT * FROM tasks INNER JOIN category ON tasks.categoryId = category.id WHERE tasks.userid={userid}";
             }
-            Console.WriteLine("burada1");
 
             using (MySqlCommand command = new MySqlCommand(sql, conn))
             {
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
-                    Console.WriteLine("burada2");
+                    
 
 
                     while (reader.Read())
@@ -353,40 +353,85 @@ namespace to_do
 
         }
 
+
+
+
+
+
+
+
+
+
+
         public object getIdByTaskName(string name)
         {
             object taskid = null;
             string sql = $"select id from tasks where title='{name}'";
-            using (MySqlCommand command = new MySqlCommand(sql, conn))
+            MySqlCommand command = new MySqlCommand(sql, conn);
+            MySqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
             {
-                using (MySqlDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        // Verileri oku ve kullani
-                        
-                        taskid =  reader.GetInt32("id");
-                        
-
-                    }
-                }
+                // Verileri oku ve kullan
+                taskid = reader.GetInt32("id");
             }
-
-
-
+            reader.Close();
+           // command.Dispose();
             return taskid;
         }
         private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             Console.WriteLine("edit mode is active");
-            
+            title = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            Console.WriteLine("basılsan sutunun title bilgisi: ",title);
         }
 
-        private void dataGridView1_CellEndEdit_1(object sender, DataGridViewCellEventArgs e)
+
+        private void dataGridView1_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
-            Console.WriteLine("eidt mode was disactie");
-            DataGridViewRow clickedRow = dataGridView1.Rows[e.RowIndex];
-            //  string oldValue = dataGridView1.Rows[e.RowIndex].ToString();
+            //    Console.WriteLine("entere basıldı");
+            //    //DataGridViewRow clickedRow = dataGridView1.Rows[e.RowIndex];
+            //    //  string oldValue = dataGridView1.Rows[e.RowIndex].ToString();
+            //    object taskId = getIdByTaskName(title);
+            //    string columnName = dataGridView1.Columns[e.ColumnIndex].HeaderText;
+            //    string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+            //    string sql = "";
+            //    Console.WriteLine(columnName);
+            //    Console.WriteLine(newValue);
+            //    //MySqlConnection conn = Connect();
+
+            //    switch (columnName)
+            //    {
+            //        case "title":
+            //            sql = $"UPDATE tasks SET title='{newValue}' WHERE id='{taskId}'";
+            //            break;
+            //        case "Start Date":
+            //            newValue = newValue.Replace('/', '-');
+            //            sql = $"UPDATE tasks SET startdate='{newValue}' WHERE id='{taskId}'";
+            //            break;
+            //        case "End Date":
+            //            newValue = newValue.Replace('/', '-');
+
+            //            sql = $"UPDATE tasks SET enddate='{newValue}' WHERE id='{taskId}'";
+            //            break;
+            //        case "Done":
+            //            Boolean value = Convert.ToBoolean(newValue);
+            //            value = !value;
+
+            //            sql = $"UPDATE tasks SET status={value} WHERE id='{taskId}'";
+            //            break;
+            //    }
+
+            //MySqlCommand cmd = new MySqlCommand(sql, conn);
+            //int rowsAffected = cmd.ExecuteNonQuery();
+            ////Console.Clear();
+
+
+            //Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
+
+        }
+        private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            Console.WriteLine("edit bitti");
             object taskId = getIdByTaskName(title);
             string columnName = dataGridView1.Columns[e.ColumnIndex].HeaderText;
             string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
@@ -401,13 +446,17 @@ namespace to_do
                     sql = $"UPDATE tasks SET title='{newValue}' WHERE id='{taskId}'";
                     break;
                 case "Start Date":
+                    newValue = newValue.Replace('/', '-');
                     sql = $"UPDATE tasks SET startdate='{newValue}' WHERE id='{taskId}'";
                     break;
                 case "End Date":
+                    newValue = newValue.Replace('/', '-');
+
                     sql = $"UPDATE tasks SET enddate='{newValue}' WHERE id='{taskId}'";
                     break;
                 case "Done":
-                    Boolean value = (newValue == "True") ? true : false;
+                    Boolean value = Convert.ToBoolean(newValue);
+                    value = !value;
 
                     sql = $"UPDATE tasks SET status={value} WHERE id='{taskId}'";
                     break;
@@ -416,29 +465,58 @@ namespace to_do
             MySqlCommand cmd = new MySqlCommand(sql, conn);
             int rowsAffected = cmd.ExecuteNonQuery();
             //Console.Clear();
-            Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
 
-           
+
+            Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
         }
+
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+                if (cell is DataGridViewCheckBoxCell)
+                {
+                    bool newValue = (bool)cell.Value;
+
+                    // Değişikliği veritabanında güncellemek için gerekli işlemleri yap
+
+                    Console.WriteLine($"Checkbox değeri değişti: {newValue}");
+                }
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
-               // DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
-                 title = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+                // DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
+
 
             }
+        }//bos
+        private void dataGridView1_CellStyleContentChanged(object sender, DataGridViewCellStyleContentChangedEventArgs e)
+        {
+
         }
+
+        
     }
-
-
-
-
-
-
-
-
 
 }
     
