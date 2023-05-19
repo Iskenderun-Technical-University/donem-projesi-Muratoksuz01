@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,16 +13,14 @@ using MySql.Data.MySqlClient;
 
 /*
     YAPILACAKLAR
-*gorevler status yada biri değiştiğinde oto kayıt olacak                        OLMADI
-*aynı sekilde categoriy isim degişmesi                                         OLMADI
-*gorev eklendiğinde message box ekle                                         tamam
-*user kısmına 'create accaunt' ekle                                         tamam 
-*start date ve adn date eski tarih ekleyemessin ve start>end date olması    OLMADI
-*takvim kısmı  bir hata var                                                 tamam
-*gorevler silme islemi                                                       tamam
-*user kayıt kısmına bak                                                      tamam
-*data gizli ıd sok sonra bunu cek fook kurtul 
-*aynı sekilde kate için 
+*gorevler status yada biri değiştiğinde oto kayıt olacak                        tamam
+*aynı sekilde categoriy isim degişmesi                                          tamam
+*gorev eklendiğinde message box ekle                                            tamam
+*user kısmına 'create accaunt' ekle                                             tamam 
+*start date ve adn date eski tarih ekleyemessin ve start>end date olması        tamam
+*takvim kısmı  bir hata var                                                     tamam
+*gorevler silme islemi                                                          tamam
+*user kayıt kısmına bak                                                         tamam
 *       UCMAK İSTERSEN 
 *           sağ click olayı 
 *           rename olayı 
@@ -145,8 +145,17 @@ namespace to_do
                 string start = values[2];
                 string end = values[3];
                 string status = values[4];
-                Console.WriteLine("kayıtlar basladı ");
-                Save(des, cat, start, end, status);
+                //start = start.Replace('/', '-');
+                //end = end.Replace("/", "-");
+                DateTime start1 = DateTime.ParseExact(start,"dd/MM/yyyy", CultureInfo.InvariantCulture);
+                DateTime end1 = DateTime.ParseExact(end, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+
+                if (end1 > start1)
+                {
+                    Console.WriteLine("kayıtlar basladı ");
+                    Save(des, cat, start, end, status);
+                }
+                else MessageBox.Show("bıtış tarihi başlangıc tarıhınden kucuk olamaz ");
 
             }
             rowCount = dataGridView1.Rows.Count;//hepsini sayar
@@ -324,8 +333,8 @@ namespace to_do
             int selectedRowIndex = dataGridView1.SelectedCells[0].RowIndex; // seçilen hücrenin satır indeksi
             DataGridViewRow selectedRow = dataGridView1.Rows[selectedRowIndex]; // seçilen satır
             string cellValue = selectedRow.Cells[0].Value.ToString(); // seçilen satırdaki ilk hücrenin değeri
-               object taskid = getIdByTaskName(title);
-            Console.WriteLine(cellValue);
+            Dictionary<string, int> taskdirectory = getIdByTaskName();
+            int taskid = taskdirectory[title]; Console.WriteLine(cellValue);
             string sql = $"DELETE FROM tasks WHERE id={taskid} and title='{cellValue}'";
             MySqlCommand cmd = new MySqlCommand(sql, conn);
             int rowsAffected = cmd.ExecuteNonQuery();
@@ -363,20 +372,29 @@ namespace to_do
 
 
 
-        public object getIdByTaskName(string name)
+        public Dictionary<string, int> getIdByTaskName()
         {
-            object taskid = null;
-            string sql = $"select id from tasks where title='{name}'";
+            string name;
+            Dictionary<string, int> myDictionary = new Dictionary<string, int>();
+            int taskid ;
+
+            //string sql = $"select id from tasks where title='{name}'";
+             string sql = $"SELECT * FROM tasks where userid={userid} ";
+
             MySqlCommand command = new MySqlCommand(sql, conn);
             MySqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
                 // Verileri oku ve kullan
+                name = reader.GetString("title");
                 taskid = reader.GetInt32("id");
+                if (!myDictionary.ContainsKey(name))
+                    myDictionary.Add(name, taskid);
+                else continue;
             }
             reader.Close();
            // command.Dispose();
-            return taskid;
+            return myDictionary;
         }
         private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
@@ -428,11 +446,12 @@ namespace to_do
 
             //Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
 
-        }
+        }//şimdilik bos
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             Console.WriteLine("edit bitti");
-            object taskId = getIdByTaskName(title);
+            Dictionary<string, int> taskdirectory = getIdByTaskName();
+            int taskId = taskdirectory[title];
             string columnName = dataGridView1.Columns[e.ColumnIndex].HeaderText;
             string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
             string sql = "";
@@ -456,7 +475,7 @@ namespace to_do
                     break;
                 case "Done":
                     Boolean value = Convert.ToBoolean(newValue);
-                    value = !value;
+                   // value = !value;
 
                     sql = $"UPDATE tasks SET status={value} WHERE id='{taskId}'";
                     break;
@@ -513,9 +532,13 @@ namespace to_do
         private void dataGridView1_CellStyleContentChanged(object sender, DataGridViewCellStyleContentChangedEventArgs e)
         {
 
-        }
+        }//bos
 
-        
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].ReadOnly = false;
+            dataGridView1.BeginEdit(true);
+        }
     }
 
 }

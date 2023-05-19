@@ -17,11 +17,14 @@ namespace to_do
     public partial class Form2 : Form
     {
         private DataGridView dataGridView1Form1;
-
         private int rowCount;
+        public MySqlConnection conn;
+
         public List<string> categorys;
         int userid;
         private Form1 form1;
+        string title="";
+        Dictionary<string, int> categoryID;
 
         public Form2(Form1 form1, DataGridView dataGridView1Form1)
         {
@@ -29,9 +32,13 @@ namespace to_do
 
             InitializeComponent();
             this.form1 = form1;
-
+            dataGridView1.ReadOnly = false;
             categorys = form1.TakeCategory();
             userid = form1.userid;
+            conn = form1.conn;
+
+
+            categoryID = form1.GetCategories();
             dataGridView1.Rows.Clear();
             foreach (string category in categorys)
             {
@@ -106,5 +113,30 @@ namespace to_do
                 }
             }
         } //secilen asatırı ve altındaki tum gorevleri siler
+
+        private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            int ID = categoryID[title];
+            string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+            string sql = $"UPDATE  category SET category_name='{newValue}' WHERE id={ID}";
+            MySqlCommand cmd = new MySqlCommand(sql, conn);
+            int rowsAffected = cmd.ExecuteNonQuery();
+            Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
+            form1.RefreshDataGridView();
+
+        }
+
+        private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            Console.WriteLine("edit mode is active");
+            title = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            Console.WriteLine("basılsan categorinin title bilgisi: ", title.ToUpper());
+        }
+
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].ReadOnly = false;
+            dataGridView1.BeginEdit(true);
+        }
     }
 }
