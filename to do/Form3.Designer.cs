@@ -244,7 +244,7 @@
             this.Controls.Add(this.txtreuser);
             this.Controls.Add(this.btnkayit);
             this.Name = "Form3";
-            this.Text = "Form3";
+            this.Text = "login or sign in ";
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -65,6 +65,7 @@ namespace to_do
         }
         private void savebtn1_Click(object sender, EventArgs e)
         {
+            Console.WriteLine("save kısmkı");
             MySqlConnection conn;
             conn = form1.conn;
             int totalRowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);//sadece görunen rows sayar 
@@ -116,13 +117,37 @@ namespace to_do
 
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            int ID = categoryID[title];
-            string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-            string sql = $"UPDATE  category SET category_name='{newValue}' WHERE id={ID}";
-            MySqlCommand cmd = new MySqlCommand(sql, conn);
-            int rowsAffected = cmd.ExecuteNonQuery();
-            Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
-            form1.RefreshDataGridView();
+            try
+            {
+                int ID = categoryID[title];
+                string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+                string sql = $"UPDATE  category SET category_name='{newValue}' WHERE id={ID}";
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                int rowsAffected = cmd.ExecuteNonQuery();
+                Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
+                form1.RefreshDataGridView();
+            }
+            catch {
+                Console.WriteLine(" try catkı save kısmkı");
+                MySqlConnection conn;
+                conn = form1.conn;
+                int totalRowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);//sadece görunen rows sayar 
+
+                for (int i = rowCount; i < totalRowCount; i++)
+                {
+                    string row = dataGridView1.Rows[i].Cells[0].Value.ToString();
+                    string sql = $"INSERT INTO category (userid,category_name) VALUES({userid},'{row}')";
+                    MySqlCommand cmd = new MySqlCommand(sql, conn);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    //Console.Clear();
+                    Console.WriteLine($"{rowsAffected} kayıt eklendi.");
+
+                }
+                //dataGridView1Form1.Refresh();
+                Form1 form = (Form1)Application.OpenForms["Form1"];
+                form.RefreshDataGridView();
+            }
+            
 
         }
 

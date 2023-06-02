@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.Drawing;
 using System.Globalization;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Threading;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Utilities.Collections;
+using static System.Windows.Forms.AxHost;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 /*
     YAPILACAKLAR
@@ -89,7 +89,7 @@ namespace to_do
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            dataGridView1.Rows.Add("tasks name", $"{columnname}", $"{today.ToString("dd/MM/yyyy")}", $"{today.ToString("dd/MM/yyyy")}", false);
+            dataGridView1.Rows.Add("tasks name", $"{columnname}", $"{today.ToString("yyyy/MM/dd")}", $"{today.ToString("yyyy/MM/dd")}", false);
             savebtn.Show();
         }//add butonu 
         private void dataGridView2_CellContentClick(object sender,
@@ -117,53 +117,7 @@ namespace to_do
             Console.WriteLine($"Seçilen sütun: {columnname}");
 
         }//all butonuna basıldında olcaklar
-        private void savebtn_Click(object sender, EventArgs e)
-        {
-            //MySqlConnection connect = Connect();
-
-            Console.WriteLine(" yeni row icin   basıldı");
-
-            int totalRowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);//sadece görunen rows sayar 
-                                                                                                  //           int newRowCount = totalRowCount - rowCount;
-            for (int i = rowCount; i < totalRowCount; i++)
-            {
-                DataGridViewRow row = dataGridView1.Rows[i];
-                string[] values = new string[row.Cells.Count];
-                for (int j = 0; j < row.Cells.Count; j++)
-                {
-                    values[j] = row.Cells[j].Value.ToString();
-                }
-                newRows.Add(values);
-            }//yeni eklenen verileri newRows adında diziye kayıt ettik 
-            Console.WriteLine("kayıt edilde");
-            // Yeni eklenen satırları veritabanına kaydetmek için bir döngü oluşturun
-            foreach (string[] values in newRows)                    //2 tane eklediğinde calısıyormu acaba
-            {
-                // Burada verileri veritabanına kaydedebilirsiniz
-                string des = values[0];
-                string cat = values[1];
-                string start = values[2];
-                string end = values[3];
-                string status = values[4];
-                //start = start.Replace('/', '-');
-                //end = end.Replace("/", "-");
-                DateTime start1 = DateTime.ParseExact(start,"dd/MM/yyyy", CultureInfo.InvariantCulture);
-                DateTime end1 = DateTime.ParseExact(end, "dd/MM/yyyy", CultureInfo.InvariantCulture);
-
-                if (end1 > start1)
-                {
-                    Console.WriteLine("kayıtlar basladı ");
-                    Save(des, cat, start, end, status);
-                }
-                else MessageBox.Show("bıtış tarihi başlangıc tarıhınden kucuk olamaz ");
-
-            }
-            rowCount = dataGridView1.Rows.Count;//hepsini sayar
-            newRows.Clear();
-
-
-
-        }
+      
         
         public void Save( string title, string category, string startDate, string endDate, string status)
         {
@@ -171,10 +125,10 @@ namespace to_do
             bool statusBool = bool.Parse(status);
             startDate = startDate.Replace("/", "-");
             endDate = endDate.Replace("/", "-");
-            string[] startDates = startDate.Split('-');
-            string[] endDates = endDate.Split('-');
-            endDate = endDates[2] + "-" + endDates[1] + "-" + endDates[0];
-            startDate = startDates[2] + "-" + startDates[1] + "-" + startDates[0];
+            //string[] startDates = startDate.Split('-');
+            //string[] endDates = endDate.Split('-');
+            //endDate = endDates[2] + "-" + endDates[1] + "-" + endDates[0];
+            //startDate = startDates[2] + "-" + startDates[1] + "-" + startDates[0];
 
 
             Console.WriteLine("save fok ");
@@ -333,8 +287,10 @@ namespace to_do
             int selectedRowIndex = dataGridView1.SelectedCells[0].RowIndex; // seçilen hücrenin satır indeksi
             DataGridViewRow selectedRow = dataGridView1.Rows[selectedRowIndex]; // seçilen satır
             string cellValue = selectedRow.Cells[0].Value.ToString(); // seçilen satırdaki ilk hücrenin değeri
+            Console.WriteLine( cellValue );
             Dictionary<string, int> taskdirectory = getIdByTaskName();
-            int taskid = taskdirectory[title]; Console.WriteLine(cellValue);
+            int taskid = taskdirectory[title];
+            Console.WriteLine( taskid.ToString( ));
             string sql = $"DELETE FROM tasks WHERE id={taskid} and title='{cellValue}'";
             MySqlCommand cmd = new MySqlCommand(sql, conn);
             int rowsAffected = cmd.ExecuteNonQuery();
@@ -362,24 +318,14 @@ namespace to_do
 
         }
 
-
-
-
-
-
-
-
-
-
-
         public Dictionary<string, int> getIdByTaskName()
         {
             string name;
             Dictionary<string, int> myDictionary = new Dictionary<string, int>();
-            int taskid ;
+            int taskid;
 
             //string sql = $"select id from tasks where title='{name}'";
-             string sql = $"SELECT * FROM tasks where userid={userid} ";
+            string sql = $"SELECT * FROM tasks where userid={userid} ";
 
             MySqlCommand command = new MySqlCommand(sql, conn);
             MySqlDataReader reader = command.ExecuteReader();
@@ -393,15 +339,217 @@ namespace to_do
                 else continue;
             }
             reader.Close();
-           // command.Dispose();
+            // command.Dispose();
             return myDictionary;
         }
         private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             Console.WriteLine("edit mode is active");
             title = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
-            Console.WriteLine("basılsan sutunun title bilgisi: ",title);
+            Console.WriteLine("basılsan sutunun title bilgisi: ", title);
         }
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+                if (cell is DataGridViewCheckBoxCell)
+                {
+                    bool newValue = (bool)cell.Value;
+
+                    // Değişikliği veritabanında güncellemek için gerekli işlemleri yap
+
+                    Console.WriteLine($"Checkbox değeri değişti: {newValue}");
+                }
+            }
+
+        }
+        private void savebtn_Click(object sender, EventArgs e)
+        {
+            //MySqlConnection connect = Connect();
+
+            Console.WriteLine(" yeni row icin   basıldı");
+
+            int totalRowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);//sadece görunen rows sayar 
+                                                                                                  //           int newRowCount = totalRowCount - rowCount;
+            for (int i = rowCount; i < totalRowCount; i++)
+            {
+                DataGridViewRow row = dataGridView1.Rows[i];
+                string[] values = new string[row.Cells.Count];
+                for (int j = 0; j < row.Cells.Count; j++)
+                {
+                    values[j] = row.Cells[j].Value.ToString();
+                }
+                newRows.Add(values);
+            }//yeni eklenen verileri newRows adında diziye kayıt ettik 
+             // Console.WriteLine("kayıt edilde");
+             // Yeni eklenen satırları veritabanına kaydetmek için bir döngü oluşturun
+            foreach (string[] values in newRows)                    //2 tane eklediğinde calısıyormu acaba
+            {
+                // Burada verileri veritabanına kaydedebilirsiniz
+                string des = values[0];
+                string cat = values[1];
+                string start = values[2];
+                string end = values[3];
+                string status = values[4];
+                //start = start.Replace('/', '-');
+                //end = end.Replace("/", "-");
+                DateTime start1 = DateTime.ParseExact(start, "yyyy/MM/dd", CultureInfo.InvariantCulture);
+                DateTime end1 = DateTime.ParseExact(end, "yyyy/MM/dd", CultureInfo.InvariantCulture);
+
+                if (end1 >= start1)
+                {
+                    Console.WriteLine("kayıtlar basladı ");
+                    Save(des, cat, start, end, status);
+                }
+                else MessageBox.Show("bıtış tarihi başlangıc tarıhınden kucuk olamaz ");
+
+            }
+            rowCount = dataGridView1.Rows.Count;//hepsini sayar
+            newRows.Clear();
+        }
+
+
+
+
+
+
+
+
+
+
+
+        private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                Console.WriteLine("edit bitti");
+                Dictionary<string, int> taskdirectory = getIdByTaskName();
+                int taskId = taskdirectory[title];
+                string columnName = dataGridView1.Columns[e.ColumnIndex].HeaderText;
+                string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+                string sql = "";
+                Console.WriteLine(columnName  +"basılan sutun");
+                Console.WriteLine(newValue +" yeni elelman");
+                //MySqlConnection conn = Connect();
+                DateTime startDate;
+                DateTime endDate;
+               
+
+                switch (columnName)
+                {
+                    case "title":
+                        sql = $"UPDATE tasks SET title='{newValue}' WHERE id='{taskId}'";
+                        break;
+                    case "Done":
+                        Boolean value = Convert.ToBoolean(newValue);
+                        sql = $"UPDATE tasks SET status={value} WHERE id='{taskId}'";
+                        break;
+                    case "Start Date":
+                        startDate = DateTime.Parse(newValue);
+                        endDate = DateTime.Parse(dataGridView1.Rows[e.RowIndex].Cells[3].Value.ToString());
+                        if (startDate > endDate)
+                        {
+                            MessageBox.Show("Hatalı giriş: Start Date, End Date'den küçük olamaz.");
+                            return;
+                        }
+
+                        sql = $"UPDATE tasks SET startdate='{newValue}' WHERE id='{taskId}'";
+                        break;
+                    case "End Date":
+                        startDate = DateTime.Parse(dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString());//start date bilgisii
+                        endDate= DateTime.Parse(newValue);
+                        if (startDate > endDate)
+                        {
+                            MessageBox.Show("Hatalı giriş: Start Date, End Date'den küçük olamaz.");
+                            return;
+                        }
+
+                        sql = $"UPDATE tasks SET enddate='{newValue}' WHERE id='{taskId}'";
+                        break;
+                }
+
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                int rowsAffected = cmd.ExecuteNonQuery();
+                Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
+
+
+
+               
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine (ex.Message);
+                {
+                    Console.WriteLine("try  catg kısmı save bolumu");
+                    int totalRowCount = dataGridView1.Rows.GetRowCount(DataGridViewElementStates.Visible);//sadece görunen rows sayar 
+                    for (int i = rowCount; i < totalRowCount; i++)
+                    {
+                        DataGridViewRow row = dataGridView1.Rows[i];
+                        string[] values = new string[row.Cells.Count];
+                        for (int j = 0; j < row.Cells.Count; j++)
+                        {
+                            values[j] = row.Cells[j].Value.ToString();
+                        }
+                        newRows.Add(values);
+                    }//yeni eklenen verileri newRows adında diziye kayıt ettik 
+                     // Console.WriteLine("kayıt edilde");
+                     // Yeni eklenen satırları veritabanına kaydetmek için bir döngü oluşturun
+                    foreach (string[] values in newRows)                    //2 tane eklediğinde calısıyormu acaba
+                    {
+                        // Burada verileri veritabanına kaydedebilirsiniz
+                        string des = values[0];
+                        string cat = values[1];
+                        string start = values[2];
+                        string end = values[3];
+                        string status = values[4];
+
+                        DateTime start1 = DateTime.ParseExact(start, "yyyy/MM/dd", CultureInfo.InvariantCulture);
+                        DateTime end1 = DateTime.ParseExact(end, "yyyy/MM/dd", CultureInfo.InvariantCulture);
+
+                        if (end1 >= start1)
+                        {
+                            Console.WriteLine("kayıtlar basladı ");
+                            Save(des, cat, start, end, status);
+                        }
+                        else MessageBox.Show("bıtış tarihi başlangıc tarıhınden kucuk olamaz ");
+
+                    }
+                    rowCount = dataGridView1.Rows.Count;//hepsini sayar
+                    newRows.Clear();
+
+                }
+
+            }
+           
+        }//hata var aslında date gecersiz olabiliyor 
+      
+
+
+
+
+       
+
+
+
+
+
+
+
+
+      
+
+
+
+
+
+
+
+
+
+
 
 
         private void dataGridView1_CellEnter(object sender, DataGridViewCellEventArgs e)
@@ -447,87 +595,14 @@ namespace to_do
             //Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
 
         }//şimdilik bos
-        private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
-        {
-            Console.WriteLine("edit bitti");
-            Dictionary<string, int> taskdirectory = getIdByTaskName();
-            int taskId = taskdirectory[title];
-            string columnName = dataGridView1.Columns[e.ColumnIndex].HeaderText;
-            string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-            string sql = "";
-            Console.WriteLine(columnName);
-            Console.WriteLine(newValue);
-            //MySqlConnection conn = Connect();
-
-            switch (columnName)
-            {
-                case "title":
-                    sql = $"UPDATE tasks SET title='{newValue}' WHERE id='{taskId}'";
-                    break;
-                case "Start Date":
-                    newValue = newValue.Replace('/', '-');
-                    sql = $"UPDATE tasks SET startdate='{newValue}' WHERE id='{taskId}'";
-                    break;
-                case "End Date":
-                    newValue = newValue.Replace('/', '-');
-
-                    sql = $"UPDATE tasks SET enddate='{newValue}' WHERE id='{taskId}'";
-                    break;
-                case "Done":
-                    Boolean value = Convert.ToBoolean(newValue);
-                   // value = !value;
-
-                    sql = $"UPDATE tasks SET status={value} WHERE id='{taskId}'";
-                    break;
-            }
-
-            MySqlCommand cmd = new MySqlCommand(sql, conn);
-            int rowsAffected = cmd.ExecuteNonQuery();
-            //Console.Clear();
-
-
-            Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
-        }
-
-
-        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
-            {
-                DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
-
-                if (cell is DataGridViewCheckBoxCell)
-                {
-                    bool newValue = (bool)cell.Value;
-
-                    // Değişikliği veritabanında güncellemek için gerekli işlemleri yap
-
-                    Console.WriteLine($"Checkbox değeri değişti: {newValue}");
-                }
-            }
-
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
-            {
-                // DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
+            //if (e.RowIndex >= 0)
+            //{
+            //    // DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
 
 
-            }
+            //}
         }//bos
         private void dataGridView1_CellStyleContentChanged(object sender, DataGridViewCellStyleContentChangedEventArgs e)
         {
@@ -536,8 +611,8 @@ namespace to_do
 
         private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].ReadOnly = false;
-            dataGridView1.BeginEdit(true);
+            //dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].ReadOnly = false;
+            //dataGridView1.BeginEdit(true);
         }
     }
 

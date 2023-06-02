@@ -186,7 +186,6 @@
             this.Column1.HeaderText = "title";
             this.Column1.MinimumWidth = 6;
             this.Column1.Name = "Column1";
-            this.Column1.ReadOnly = true;
             this.Column1.Width = 125;
             // 
             // Column5
@@ -194,6 +193,7 @@
             this.Column5.HeaderText = "Category";
             this.Column5.MinimumWidth = 6;
             this.Column5.Name = "Column5";
+            this.Column5.ReadOnly = true;
             this.Column5.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.Column5.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.Column5.Width = 125;
@@ -206,7 +206,6 @@
             this.Column2.HeaderText = "Start Date";
             this.Column2.MinimumWidth = 6;
             this.Column2.Name = "Column2";
-            this.Column2.ReadOnly = true;
             this.Column2.Width = 125;
             // 
             // Column3
@@ -217,7 +216,6 @@
             this.Column3.HeaderText = "End Date";
             this.Column3.MinimumWidth = 6;
             this.Column3.Name = "Column3";
-            this.Column3.ReadOnly = true;
             this.Column3.Width = 125;
             // 
             // Column4
