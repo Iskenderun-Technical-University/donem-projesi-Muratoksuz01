@@ -107,7 +107,7 @@ namespace to_do
             string email= txtreemail.Text;
           
 
-            if(email!="" &&username!="" && password != "")
+            if(email!="" && username!="" && password != "")
             {
                 sql = $"INSERT INTO users (username,passwd,email) VALUES ('{username}','{password}','{email}')";
                 MySqlCommand cmd = new MySqlCommand(sql, conn);
@@ -160,32 +160,37 @@ namespace to_do
             conn = Connect();
             string username=txtlouser.Text;
             string password=txtlopass.Text;
-            sql = $"SELECT * FROM users WHERE username='{username}' and passwd='{password}'";
-            using (MySqlCommand command = new MySqlCommand(sql, conn))
+            if (username == "" && password == "") MessageBox.Show("username yada password bos bırakılamaz");
+            else
             {
-                using (MySqlDataReader reader = command.ExecuteReader())
+
+                sql = $"SELECT * FROM users WHERE username='{username}' and passwd='{password}'";
+                using (MySqlCommand command = new MySqlCommand(sql, conn))
                 {
-                    Console.WriteLine(reader.ToString());
-                    if (reader.HasRows) 
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
-
-                        while (reader.Read())
+                        Console.WriteLine(reader.ToString());
+                        if (reader.HasRows)
                         {
-                            // kayıt varsa ilgili verileri burada kullanabilirsiniz
-                            userid = (int)reader["id"];
-                            username1 = reader.GetString("username");
+
+                            while (reader.Read())
+                            {
+                                // kayıt varsa ilgili verileri burada kullanabilirsiniz
+                                userid = (int)reader["id"];
+                                username1 = reader.GetString("username");
+                            }
+
+
+
+                            Form1 form1 = new Form1(this);
+                            form1.Show();
+                            this.Hide();
+                            Console.WriteLine(userid.ToString() + "   " + username1);
                         }
-
-
-
-                        Form1 form1 = new Form1(this);
-                        form1.Show();
-                        this.Hide();
-                        Console.WriteLine(userid.ToString()+"   "+ username1);
-                    }
-                    else
-                    {
-                        MessageBox.Show("verdiğiniz bilgilere gore kişi yok");
+                        else
+                        {
+                            MessageBox.Show("verdiğiniz bilgilere gore kişi yok");
+                        }
                     }
                 }
             }

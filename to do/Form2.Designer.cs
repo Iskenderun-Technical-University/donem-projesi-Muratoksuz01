@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.addcatebtn = new System.Windows.Forms.Button();
             this.delbtn = new System.Windows.Forms.Button();
             this.savebtn1 = new System.Windows.Forms.Button();
+            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -52,14 +52,6 @@
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellDoubleClick);
             this.dataGridView1.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellEndEdit);
-            // 
-            // Column1
-            // 
-            this.Column1.HeaderText = "Column Name";
-            this.Column1.MinimumWidth = 6;
-            this.Column1.Name = "Column1";
-            this.Column1.ReadOnly = true;
-            this.Column1.Width = 275;
             // 
             // addcatebtn
             // 
@@ -83,13 +75,22 @@
             // 
             // savebtn1
             // 
-            this.savebtn1.Location = new System.Drawing.Point(206, 253);
+            this.savebtn1.Location = new System.Drawing.Point(307, 278);
             this.savebtn1.Name = "savebtn1";
-            this.savebtn1.Size = new System.Drawing.Size(75, 23);
+            this.savebtn1.Size = new System.Drawing.Size(10, 10);
             this.savebtn1.TabIndex = 3;
             this.savebtn1.Text = "Save";
             this.savebtn1.UseVisualStyleBackColor = true;
+            this.savebtn1.Visible = false;
             this.savebtn1.Click += new System.EventHandler(this.savebtn1_Click);
+            // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "cagetory name";
+            this.Column1.MinimumWidth = 6;
+            this.Column1.Name = "Column1";
+            this.Column1.ReadOnly = true;
+            this.Column1.Width = 275;
             // 
             // Form2
             // 
@@ -110,9 +111,9 @@
         #endregion
 
         private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.Button addcatebtn;
         private System.Windows.Forms.Button delbtn;
         private System.Windows.Forms.Button savebtn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
     }
 }

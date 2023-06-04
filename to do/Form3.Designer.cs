@@ -79,6 +79,7 @@
             // 
             this.txtrepass.Location = new System.Drawing.Point(581, 137);
             this.txtrepass.Name = "txtrepass";
+            this.txtrepass.PasswordChar = '*';
             this.txtrepass.Size = new System.Drawing.Size(92, 22);
             this.txtrepass.TabIndex = 4;
             this.txtrepass.Visible = false;
@@ -139,9 +140,9 @@
             // 
             this.txtlopass.Location = new System.Drawing.Point(239, 134);
             this.txtlopass.Name = "txtlopass";
+            this.txtlopass.PasswordChar = '*';
             this.txtlopass.Size = new System.Drawing.Size(100, 22);
             this.txtlopass.TabIndex = 16;
-            this.txtlopass.Text = "4321";
             // 
             // txtlouser
             // 
@@ -149,7 +150,6 @@
             this.txtlouser.Name = "txtlouser";
             this.txtlouser.Size = new System.Drawing.Size(100, 22);
             this.txtlouser.TabIndex = 15;
-            this.txtlouser.Text = "tuna";
             // 
             // lbllink
             // 

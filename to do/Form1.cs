@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Threading;
 using System.Windows.Forms;
+using Google.Protobuf.WellKnownTypes;
 using MySql.Data.MySqlClient;
 using Org.BouncyCastle.Utilities.Collections;
 using static System.Windows.Forms.AxHost;
@@ -42,6 +44,8 @@ namespace to_do
         public int userid;
         private int rowCount;
         string title = "";
+        string sql = "";
+
         List<string[]> newRows = new List<string[]>();
         DateTime today = DateTime.Today;
 
@@ -289,9 +293,9 @@ namespace to_do
             string cellValue = selectedRow.Cells[0].Value.ToString(); // seçilen satırdaki ilk hücrenin değeri
             Console.WriteLine( cellValue );
             Dictionary<string, int> taskdirectory = getIdByTaskName();
-            int taskid = taskdirectory[title];
+            int taskid = taskdirectory[cellValue];
             Console.WriteLine( taskid.ToString( ));
-            string sql = $"DELETE FROM tasks WHERE id={taskid} and title='{cellValue}'";
+            string sql = $"DELETE FROM tasks WHERE id={taskid}";
             MySqlCommand cmd = new MySqlCommand(sql, conn);
             int rowsAffected = cmd.ExecuteNonQuery();
             //Console.Clear();
@@ -341,12 +345,6 @@ namespace to_do
             reader.Close();
             // command.Dispose();
             return myDictionary;
-        }
-        private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
-        {
-            Console.WriteLine("edit mode is active");
-            title = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
-            Console.WriteLine("basılsan sutunun title bilgisi: ", title);
         }
 
         private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -412,15 +410,6 @@ namespace to_do
         }
 
 
-
-
-
-
-
-
-
-
-
         private void dataGridView1_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             try
@@ -430,7 +419,6 @@ namespace to_do
                 int taskId = taskdirectory[title];
                 string columnName = dataGridView1.Columns[e.ColumnIndex].HeaderText;
                 string newValue = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
-                string sql = "";
                 Console.WriteLine(columnName  +"basılan sutun");
                 Console.WriteLine(newValue +" yeni elelman");
                 //MySqlConnection conn = Connect();
@@ -525,35 +513,63 @@ namespace to_do
             }
            
         }//hata var aslında date gecersiz olabiliyor 
-      
-
-
-
-
-       
-
-
-
-
-
 
 
 
       
+        private void dataGridView1_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            Console.WriteLine("edit mode is active");
+            title = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            Console.WriteLine("basılsan sutunun title bilgisi: ", title);
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+           // DataGridViewCell cell = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+          //  if (cell is DataGridViewCheckBoxCell)
+            {
+                //string value1 = cell.Value.ToString();
+                //Boolean value = Convert.ToBoolean(value1);
+
+                //Dictionary<string, int> taskdirectory = getIdByTaskName();
+                //int taskId = taskdirectory[title];
+                //sql = $"UPDATE tasks SET status={!value} WHERE id='{taskId}'";
+                //MySqlCommand cmd = new MySqlCommand(sql, conn);
+                //int rowsAffected = cmd.ExecuteNonQuery();
+                //Console.WriteLine($"{rowsAffected} kayıt guncellendi. checkbox degeri");
+                //Console.WriteLine();
+                //bool newValue = (bool)cell.Value;
+                //Dictionary<string, int> taskdirectory = getIdByTaskName();
+                //int taskId = taskdirectory[title];
+                //// Değişikliği veritabanında güncellemek için gerekli işlemleri yap
+                //string sql = $"UPDATE tasks SET status={newValue} WHERE id={taskId}";
+                //MySqlCommand cmd = new MySqlCommand(sql, conn);
+                //int rowsAffected = cmd.ExecuteNonQuery();
+                //Console.WriteLine($"{rowsAffected} kayıt güncellendi.");
+
+               // Console.WriteLine($"Checkbox değeri değişti: {newValue}");
+            }
 
 
 
+            
+        }
 
 
 
+        private void dataGridView1_CellStyleContentChanged(object sender,
+          DataGridViewCellStyleContentChangedEventArgs e)
+        {
 
-
-
-
-
+        }//bos
 
         private void dataGridView1_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
+            
+         
+/*
             //    Console.WriteLine("entere basıldı");
             //    //DataGridViewRow clickedRow = dataGridView1.Rows[e.RowIndex];
             //    //  string oldValue = dataGridView1.Rows[e.RowIndex].ToString();
@@ -593,27 +609,17 @@ namespace to_do
 
 
             //Console.WriteLine($"{rowsAffected} kayıt guncellendi.");
-
+*/
         }//şimdilik bos
-        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            //if (e.RowIndex >= 0)
-            //{
-            //    // DataGridViewRow row = this.dataGridView1.Rows[e.RowIndex];
-
-
-            //}
-        }//bos
-        private void dataGridView1_CellStyleContentChanged(object sender, DataGridViewCellStyleContentChangedEventArgs e)
-        {
-
-        }//bos
-
         private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-            //dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].ReadOnly = false;
-            //dataGridView1.BeginEdit(true);
-        }
+           
+        }// bos
+
+        private void dataGridView1_KeyDown(object sender, KeyEventArgs e)
+        {
+           
+        }//bos
     }
 
 }
